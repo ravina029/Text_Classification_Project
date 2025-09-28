@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints
+data/
+results/
+logs/
+
+# Ignore local conda/venv environment
+venv/

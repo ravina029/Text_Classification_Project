@@ -12,11 +12,14 @@ evaluate>=0.4.0
 scikit-learn
 pandas
 numpy
+nltk
 
 # Visualization
 matplotlib
 seaborn
+wordcloud
 
 # Utilities
 tqdm
 pyyaml
+#yaml

@@ -4,7 +4,7 @@ torchvision
 torchaudio
 
 # Hugging Face
-transformers>=4.30.0
+transformers>=4.57.0
 datasets>=2.14.0
 evaluate>=0.4.0
 
@@ -13,6 +13,7 @@ scikit-learn
 pandas
 numpy
 nltk
+ipykernel
 
 # Visualization
 matplotlib
@@ -23,3 +24,4 @@ wordcloud
 tqdm
 pyyaml
 #yaml
+jupyter 

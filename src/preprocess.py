@@ -1,42 +1,43 @@
-# src/preprocess.py
-import re
-import string
+import re, unicodedata
+from typing import Dict
 from pathlib import Path
-from src.load_data import load_imdb_dataset
-from src.utils.config import load_config
+try:
+    import contractions
+except:
+    contractions = None
+try:
+    import emoji
+except:
+    emoji = None
+import spacy
 
-import nltk
-from nltk.corpus import stopwords
+nlp = spacy.load("en_core_web_sm", disable=["parser","ner"])
 
-nltk.download("stopwords")
-STOPWORDS = set(stopwords.words("english"))
+def normalize_unicode(text: str) -> str:
+    return unicodedata.normalize("NFKC", text)
 
-def clean_text(text, config):
-    if config["preprocessing"]["lowercase"]:
-        text = text.lower()
-    # Remove HTML tags
-    text = re.sub(r"<.*?>", " ", text)
-    if config["preprocessing"]["remove_punctuation"]:
-        text = text.translate(str.maketrans("", "", string.punctuation))
-    # Remove extra spaces
-    text = re.sub(r"\s+", " ", text).strip()
-    if config["preprocessing"]["remove_stopwords"]:
-        words = [w for w in text.split() if w not in STOPWORDS]
-        text = " ".join(words)
+def strip_html(text: str) -> str:
+    return re.sub(r'<.*?>', ' ', text)
+
+def expand_contractions_safe(text: str) -> str:
+    if contractions:
+        return contractions.fix(text)
     return text
 
-def preprocess_dataset(config=None):
-    if config is None:
-        config = load_config()
-    data = load_imdb_dataset(config)
+def full_clean(text: str, cfg: Dict):
+    if not isinstance(text, str):
+        return ""
+    t = normalize_unicode(text)
+    t = strip_html(t)
+    t = expand_contractions_safe(t)
+    if cfg.get("lowercase", True):
+        t = t.lower()
+    if cfg.get("remove_non_alpha", False):
+        t = re.sub(r'[^a-z\s]', ' ', t)
+    t = re.sub(r'\s+', ' ', t).strip()
+    return t
 
-    processed = {"train": {"pos": [], "neg": []}, "test": {"pos": [], "neg": []}}
-    for split in ["train", "test"]:
-        for label in ["pos", "neg"]:
-            processed[split][label] = [clean_text(txt, config) for txt in data[split][label]]
-    return processed
-
-if __name__ == "__main__":
-    config = load_config()
-    processed_data = preprocess_dataset(config)
-    print(f"Processed train pos: {len(processed_data['train']['pos'])}")
+def lemmatize(text: str, remove_stopwords=True):
+    doc = nlp(text)
+    toks = [tok.lemma_.lower() for tok in doc if tok.is_alpha and (not tok.is_stop or not remove_stopwords)]
+    return " ".join(toks)

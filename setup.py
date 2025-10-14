@@ -1,5 +1,24 @@
 import os
 
+from setuptools import setup, find_packages
+
+setup(
+    name="text_classification_project",
+    version="0.1.0",
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    install_requires=[
+        # you can keep minimal here; main deps in requirements.txt
+    ],
+    entry_points={
+        "console_scripts": [
+            "tc-train = src.train:main",
+            "tc-predict = src.predict:main",
+        ],
+    },
+)
+
+
 # Define the folder structure
 folders = [
     "data",

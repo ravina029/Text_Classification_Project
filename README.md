@@ -102,14 +102,13 @@ Stretch research goals:
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/your-username/text_classification_project.git
+git clone https://github.com/ravina029/Text_Classification_Project/tree/main
 cd text_classification_project
 ```
 
 ### 2️⃣ Create a virtual environment
 ```bash
-python -m venv venv
-source venv/bin/activate    # Linux/Mac
+conda create -p ./venv python=3.11 -y   # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
 

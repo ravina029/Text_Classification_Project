@@ -1,0 +1,13 @@
+LICENSE
+README.md
+setup.py
+src/text_classification_project.egg-info/PKG-INFO
+src/text_classification_project.egg-info/SOURCES.txt
+src/text_classification_project.egg-info/dependency_links.txt
+src/text_classification_project.egg-info/entry_points.txt
+src/text_classification_project.egg-info/top_level.txt
+src/utils/__init__.py
+src/utils/config.py
+src/utils/logger.py
+tests/test_load_data.py
+tests/test_preprocess.py

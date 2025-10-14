@@ -5,6 +5,4 @@ __pycache__/
 data/
 results/
 logs/
-
-# Ignore local conda/venv environment
 venv/

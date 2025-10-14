@@ -1,48 +1,37 @@
-# src/train.py
-import os
+import argparse
+from pathlib import Path
 import joblib
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
-from preprocess import preprocess_dataset
-from utils.config import load_config
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.model_selection import train_test_split
+from src.utils.config import load_config
+from src.utils.logger import setup_logger
+from src.features import build_tfidf, save_vectorizer
 
-def train_model(config=None):
-    if config is None:
-        config = load_config()
-
-    processed_data = preprocess_dataset(config)
-
-    # Merge positive and negative reviews
-    X_train = processed_data['train']['pos'] + processed_data['train']['neg']
-    y_train = [1]*len(processed_data['train']['pos']) + [0]*len(processed_data['train']['neg'])
-
-    X_test = processed_data['test']['pos'] + processed_data['test']['neg']
-    y_test = [1]*len(processed_data['test']['pos']) + [0]*len(processed_data['test']['neg'])
-
-    # TF-IDF vectorizer
-    max_features = config["preprocessing"].get("max_features", 5000)
-    vectorizer = TfidfVectorizer(max_features=max_features)
-    X_train_vec = vectorizer.fit_transform(X_train)
-    X_test_vec = vectorizer.transform(X_test)
-
-    # Logistic Regression parameters from config
-    lr_params = config["model"].get("logistic_regression", {})
-    clf = LogisticRegression(**lr_params)
+def train_classical(cfg):
+    logger = setup_logger(cfg["paths"]["logs_dir"] + "/train.log")
+    df = __import__("pandas").read_csv(cfg["paths"]["processed_dir"] + "/imdb_preprocessed.csv")
+    X = df["final_review"] if "final_review" in df.columns else df["processed_text"]
+    y = df["sentiment"]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
+    vec, X_train_vec = build_tfidf(X_train, max_features=cfg["features"]["tfidf_max_features"], ngram_range=tuple(cfg["features"]["tfidf_ngram_range"]))
+    X_test_vec = vec.transform(X_test)
+    clf = LogisticRegression(max_iter=1000)
+    logger.info("Training LogisticRegression")
     clf.fit(X_train_vec, y_train)
+    preds = clf.predict(X_test_vec)
+    logger.info("Accuracy: %.4f", accuracy_score(y_test, preds))
+    logger.info("\n" + classification_report(y_test, preds))
+    Path(cfg["paths"]["results_dir"]).mkdir(exist_ok=True, parents=True)
+    joblib.dump(clf, Path(cfg["paths"]["results_dir"]) / "logreg.joblib")
+    save_vectorizer(vec, Path(cfg["paths"]["results_dir"]) / "tfidf_vectorizer.joblib")
 
-    # Save model and vectorizer
-    model_dir = Path(config["results"].get("model_dir", "results/models"))
-    os.makedirs(model_dir, exist_ok=True)
-    joblib.dump(clf, model_dir / "logreg_model.joblib")
-    joblib.dump(vectorizer, model_dir / "vectorizer.joblib")
-
-    # Evaluate
-    y_pred = clf.predict(X_test_vec)
-    print("Test Accuracy:", accuracy_score(y_test, y_pred))
-    print(classification_report(y_test, y_pred))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, default="configs/config.yaml")
+    args = parser.parse_args()
+    cfg = load_config(args.config)
+    train_classical(cfg)
 
 if __name__ == "__main__":
-    config = load_config()
-    train_model(config)
+    main()

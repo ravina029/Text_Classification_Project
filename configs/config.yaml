@@ -1,26 +1,25 @@
-# config/config.yaml
-
-data:
-  base_path: "data/raw/aclImdb"   # where your IMDB dataset lives
-  encoding: "utf-8"
-
+project:
+  name: imdb_text_classification
+paths:
+  raw_data: data/aclImdb
+  processed_dir: data/processed
+  results_dir: results
+  logs_dir: logs
 preprocessing:
   lowercase: true
-  remove_punctuation: true
-  remove_stopwords: true
-  lemmatize: false
-  max_features: 5000
-
-model:
-  type: "logistic_regression"   # later you can switch to "svm" or "transformer"
-  logistic_regression:
-    max_iter: 1000
-    random_state: 42
-
+  expand_contractions: true
+  remove_non_alpha: false
+  demojize: false
+tokenization:
+  use_lemmatization: true
+  max_length: 256
+features:
+  tfidf_max_features: 20000
+  tfidf_ngram_range: [1,2]
 training:
-  test_size: 0.2
-  random_state: 42
-
-results:
-  model_dir: "results/models"
-  metrics_file: "results/metrics.json"
+  model_name: distilbert-base-uncased
+  batch_size: 8
+  eval_batch_size: 16
+  num_epochs: 1
+  learning_rate: 5e-5
+  device: cpu

@@ -1,0 +1,3 @@
+[console_scripts]
+tc-predict = src.predict:main
+tc-train = src.train:main

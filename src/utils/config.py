@@ -1,32 +1,10 @@
-# src/utils/config.py
-
-from pathlib import Path
 import yaml
+from pathlib import Path
 
-def load_config(filename="config.yaml"):
-    """
-    Load the project configuration file.
-
-    Args:
-        filename (str): Name of the config file (default: config.yaml).
-                        The function looks inside the project_root/config/ folder.
-
-    Returns:
-        dict: Parsed YAML configuration.
-
-    Raises:
-        FileNotFoundError: If the config file does not exist.
-    """
-
-    # Get project root: 2 levels up from this file (utils/ -> src/ -> project_root)
-    project_root = Path(__file__).resolve().parents[2]
-
-    # Full path to config file
-    config_path = project_root / "config" / filename
-
-    if not config_path.exists():
-        raise FileNotFoundError(f"Config file not found at {config_path}")
-
-    # Load YAML safely
-    with open(config_path, "r") as f:
-        return yaml.safe_load(f)
+def load_config(path: str):
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"Config file not found at {path}")
+    with open(p, "r") as f:
+        cfg = yaml.safe_load(f)
+    return cfg

@@ -16,10 +16,13 @@ tokenization:
 features:
   tfidf_max_features: 20000
   tfidf_ngram_range: [1,2]
-training:
-  model_name: distilbert-base-uncased
+
+huggingface:
+  model_name: "distilbert-base-uncased"
+  num_labels: 2
+  num_train_epochs: 1
   batch_size: 8
   eval_batch_size: 16
-  num_epochs: 1
   learning_rate: 5e-5
+  model_save_dir: "models/hf_model"
   device: cpu
